@@ -1,0 +1,3 @@
+PID=$(pidof bluebrain-upload)
+echo $PID
+top -p $PID

@@ -1,0 +1,39 @@
+#!/bin/bash
+
+PROCESS=video_test
+LOG=$(date "+%Y%m%d%H%M%S")
+LOG+=".log"
+
+
+#删除上次的监控文件
+if [ -f "$LOG" ];then 
+    rm "$LOG"
+fi
+
+#过滤出需要的进程ID
+PID=$(pidof $PROCESS)
+
+while [ "$PID" == "" ]
+do
+	echo $PROCESS not start yet.
+	sleep 1
+	PID=$(pidof $PROCESS)
+done
+
+echo $PROCESS start...
+
+MEM_PRE=
+MEM_CUR=
+
+while [ "$PID" != "" ]    
+do
+	MEM_CUR=$(cat /proc/$PID/status | grep RSS)  #过滤出VmRSS行
+	if [ "$MEM_CUR" != "$MEM_PRE" ]; then
+		MEM_PRE=$MEM_CUR
+		echo $(date "+%Y-%m-%d %H:%M:%S"):$MEM_CUR >> $LOG
+	fi
+    sleep 1
+	PID=$(pidof $PROCESS)
+done
+
+echo $(date "+%Y-%m-%d %H:%M:%S") $PROCESS exit.
